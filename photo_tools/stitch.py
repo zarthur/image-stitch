@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from PIL import Image, ImageFilter
+from PIL import Image
 
 
 def get_files(directory: str, name_filter: str = "*.jpg") -> List:
