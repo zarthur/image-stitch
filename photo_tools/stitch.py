@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 
 def get_files(directory: str, name_filter: str = "*.jpg") -> List:
@@ -62,6 +62,7 @@ def create_strips(file_paths: List[str]) -> Tuple[np.ndarray, np.ndarray,
     strip_width = image_width // number_of_files
 
     for index, file_path in enumerate(file_paths):
+        _, filename = os.path.split(file_path)
         start = index * strip_width
         end = (image_width if index == (number_of_files - 1)
                else (index + 1) * strip_width)
@@ -73,10 +74,10 @@ def create_strips(file_paths: List[str]) -> Tuple[np.ndarray, np.ndarray,
         mean_r = int(new_r.mean())
         mean_g = int(new_g.mean())
         mean_b = int(new_b.mean())
-        message = ("Processed image {0} of {1}: "
-                   "{2}px to {3}px, mean RGB: ({4}, {5}, {6})"
-                   .format(index + 1, number_of_files, start, end - 1,
-                           mean_r, mean_g, mean_b))
+        message = ("Processed image {0} of {1}: {2}, "
+                   "{3}px to {4}px, mean RGB: ({5}, {6}, {7})"
+                   .format(index + 1, number_of_files, filename,
+                           start, end - 1, mean_r, mean_g, mean_b))
         print(message)
 
     return final_r, final_g, final_b
