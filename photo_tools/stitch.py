@@ -43,12 +43,14 @@ def read_strip(image_path: str, start: int = None, end: int = None) -> \
                 data_b[:, start:end])
 
 
-def create_strips(file_paths: List[str]) -> Tuple[np.ndarray, np.ndarray,
-                                                  np.ndarray]:
+def create_strips(file_paths: List[str], averaging=True) -> Tuple[np.ndarray,
+                                                                  np.ndarray,
+                                                                  np.ndarray]:
     """
     Aggregate vertical-strip data from source images
 
     :param file_paths: list of paths to source images, read in order
+    :param averaging: average strip with surrounding strips
     :return: three Numpy arrays corresponding to RGB data for combined image
     """
     first_file, *_ = file_paths
@@ -66,7 +68,25 @@ def create_strips(file_paths: List[str]) -> Tuple[np.ndarray, np.ndarray,
         start = index * strip_width
         end = (image_width if index == (number_of_files - 1)
                else (index + 1) * strip_width)
-        new_r, new_g, new_b = read_strip(file_path, start, end)
+
+        if averaging and 1 < index < number_of_files - 2:
+            left_2_file_path = file_paths[index - 2]
+            left_file_path = file_paths[index - 1]
+            right_file_path = file_paths[index + 1]
+            right_2_file_path = file_paths[index + 2]
+
+            left2_r, left2_g, left2_b = read_strip(left_2_file_path, start, end)
+            left_r, left_g, left_b = read_strip(left_file_path, start, end)
+            center_r, center_g, center_b = read_strip(file_path, start, end)
+            right_r, right_g, right_b = read_strip(right_file_path, start, end)
+            right2_r, right2_g, right2_b = read_strip(right_2_file_path, start, end)
+
+            new_r = (left2_r // 5 + left_r // 5 + center_r // 5 + right_r // 5 + right2_r //5)
+            new_g = (left2_g // 5 + left_g // 5 + center_g // 5 + right_g // 5 + right2_g //5)
+            new_b = (left2_b // 5 + left_b // 5 + center_b // 5 + right_b // 5 + right2_b //5)
+        else:
+            new_r, new_g, new_b = read_strip(file_path, start, end)
+
         final_r[:, start:end] = new_r
         final_g[:, start:end] = new_g
         final_b[:, start:end] = new_b
